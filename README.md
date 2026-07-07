@@ -1,50 +1,44 @@
 # codex-vibe-code
 
-Template chuẩn cho dự án AI Vibe Code chạy trên Codex. Bản này chuyển template Claude gốc sang các convention hiện tại của Codex: `AGENTS.md` cho project instructions, `.agents/skills` cho repo-scoped skills, và `.codex/agents` cho custom subagents.
+Template để khởi tạo dự án làm việc với Codex theo workflow có kiểm soát: spec, plan, build, test, review, ship. Repo này ưu tiên context gọn, task nhỏ, verification thật, và các skill có thể tái dùng.
 
-## Vì sao dùng template này?
+## Dùng Nhanh
 
-- Tối ưu token bằng RTK cho shell output và skill `caveman` khi cần giao tiếp siêu ngắn.
-- Ép quy trình có cấu trúc: `interview -> refine -> spec -> plan -> build -> test -> review -> simplify -> ship`.
-- Dùng Codex skills thay cho prompt dài lặp lại mỗi lần.
-- Giữ source of truth rõ ràng qua `SPEC.md`, `tasks/plan.md`, và `tasks/todo.md`.
-- Có custom agents cho review, security audit, và test strategy khi cần chạy subagents song song.
-- Bắt buộc verify bằng evidence thật trước khi coi một task là xong.
-
-## Cấu trúc
-
-```text
-.
-├── AGENTS.md                     # Durable project instructions loaded by Codex
-├── SPEC.md                       # What and why: features, stack, acceptance criteria
-├── tasks/
-│   ├── plan.md                   # How and order: task plan, AC, verification
-│   ├── todo.md                   # Live progress checklist
-│   ├── test-plan.md              # Browser/E2E suites for vibe-e2e
-│   └── test-result.md            # Non-pass E2E evidence
-├── .agents/
-│   ├── skills/                   # Repo-scoped Codex skills
-│   └── references/               # Reusable checklists
-└── .codex/
-    └── agents/                   # Project custom subagents
+```bash
+git clone https://github.com/netcoreltd/codex-vibe-code.git my-project
+cd my-project
+rm -rf .git
+codex
 ```
 
-## Yêu cầu cài đặt
+Sau khi mở Codex trong project mới, chạy theo thứ tự:
+
+```text
+$vibe-spec
+Mô tả sản phẩm bạn muốn xây.
+```
+
+```text
+$vibe-plan
+```
+
+```text
+$vibe-build T01
+```
+
+## Cài Đặt
 
 ### Codex
 
-Cài Codex CLI hoặc dùng Codex app/IDE extension theo tài liệu OpenAI. Sau khi mở repo này trong Codex, project instructions sẽ được đọc từ `AGENTS.md`.
-
-Kiểm tra nhanh:
+Cài Codex CLI hoặc dùng Codex app/IDE extension. Kiểm tra:
 
 ```bash
 codex --version
-codex --ask-for-approval never "Summarize the current project instructions."
 ```
 
 ### RTK
 
-[RTK](https://github.com/rtk-ai/rtk) là CLI proxy giúp nén output command.
+Repo yêu cầu prefix shell commands bằng `rtk` để giảm token từ output.
 
 ```bash
 curl -fsSL https://rtk.ai/install.sh | sh
@@ -52,124 +46,280 @@ rtk --version
 rtk gain
 ```
 
-## Bắt đầu dự án mới
+### Caveman
 
-Clone hoặc copy template:
+Caveman giúp agent trả lời ngắn hơn để giảm output token. Cần Node.js trên máy.
+
+Cài nhanh cho các agent được phát hiện trên máy:
 
 ```bash
-git clone https://github.com/netcoreltd/codex-vibe-code.git my-project
-cd my-project
-rm -f README.md
-rm -rf .git
+curl -fsSL https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.sh | bash
 ```
 
-Mở Codex tại root của dự án:
+Nếu muốn review script trước khi chạy:
 
 ```bash
+curl -fsSL https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.sh -o install-caveman.sh
+less install-caveman.sh
+bash install-caveman.sh
+```
+
+Sau khi cài, dùng trong Codex bằng cách nói:
+
+```text
+/caveman
+```
+
+hoặc:
+
+```text
+talk like caveman
+```
+
+Tắt chế độ này:
+
+```text
+normal mode
+```
+
+### Ponytail
+
+Ponytail ép agent chọn giải pháp tối thiểu trước khi viết code: không build thừa, không tạo abstraction sớm, ưu tiên code đã có, stdlib, native platform, dependency hiện hữu.
+
+Cài cho Codex CLI:
+
+```bash
+codex plugin marketplace add DietrichGebert/ponytail
 codex
 ```
 
-Khi copy template cho project mới, viết lại `SPEC.md`, `tasks/plan.md`, `tasks/todo.md`, và `tasks/test-plan.md` theo sản phẩm thật. Các file này là scaffold vận hành, không phải spec cố định cho mọi project.
+Trong Codex:
 
-## Token-efficient mode
+```text
+/plugins
+```
 
-- `AGENTS.md` chỉ giữ luật luôn cần: mục đích repo, token mode, thứ tự đọc file, skill routing tối thiểu.
-- Hướng dẫn dài nằm trong `.agents/references/` và chỉ đọc khi task cần.
-- Tách phase rõ: `spec -> plan -> build -> review -> ship/e2e`. Nên mở session mới hoặc compact context giữa các phase lớn.
-- Ưu tiên đọc lát cắt file nhỏ, không scan toàn repo nếu chưa cần.
-- Giảm MCP/tool overhead: chỉ bật/gọi tool cần thiết; với GitHub data thường dùng `gh` CLI hoặc predownload diff/log vào file thay vì gọi MCP nhiều vòng.
+Sau đó chọn Ponytail marketplace và install Ponytail. Tiếp theo mở:
 
-## Workflow chính
+```text
+/hooks
+```
 
-### 1. Làm rõ yêu cầu với `$vibe-spec`
+Review và trust hai lifecycle hooks của Ponytail, rồi mở thread mới.
 
-Nếu bắt đầu từ ý tưởng mới:
+Codex desktop app: restart app sau khi install để plugin được nhận diện.
+
+Lệnh thường dùng sau khi cài:
+
+```text
+/ponytail
+/ponytail lite
+/ponytail full
+/ponytail ultra
+/ponytail off
+```
+
+## Khởi Tạo Project Mới
+
+Sau khi copy template, viết lại các file source-of-truth theo sản phẩm thật:
+
+| File | Mục đích |
+|------|----------|
+| `SPEC.md` | Mục tiêu, stack, phạm vi, acceptance criteria |
+| `tasks/plan.md` | Task chi tiết, dependency order, verification |
+| `tasks/todo.md` | Checklist tiến độ |
+| `tasks/test-plan.md` | Browser/E2E cases |
+
+Nên giữ `AGENTS.md` ngắn. Nếu cần hướng dẫn dài, thêm vào `.agents/references/` và chỉ đọc khi task cần.
+
+## Workflow Chính
+
+### 1. Spec
+
+Dùng khi bắt đầu project hoặc feature mới.
 
 ```text
 $vibe-spec
 
-Tôi muốn làm app quản lý công việc cá nhân với Next.js và Supabase.
+Tôi muốn xây app quản lý công việc cá nhân với web UI, đăng nhập, CRUD task, và dashboard.
 ```
 
-Nếu onboard vào codebase có sẵn:
+Kết quả mong đợi: Codex cập nhật `SPEC.md` rồi dừng để bạn xác nhận.
 
-```text
-$vibe-spec
+### 2. Plan
 
-Dự án này đã có source code. Hãy đọc codebase, hiểu kiến trúc, tính năng hiện tại, stack công nghệ, rồi tạo SPEC.md phản ánh đúng trạng thái hiện tại. Sau đó hỏi tôi về tính năng mới cần bổ sung.
-```
-
-### 2. Lập kế hoạch với `$vibe-plan`
+Dùng sau khi spec đã rõ.
 
 ```text
 $vibe-plan
-
-Trước khi lập kế hoạch, hãy tra cứu phiên bản mới nhất của runtime, framework, dependency chính và Docker image liên quan. Ghi phiên bản đã chọn vào tasks/plan.md kèm lý do.
 ```
 
-Codex sẽ tạo hoặc cập nhật:
+Kết quả mong đợi:
 
-- `tasks/plan.md`: task chi tiết, acceptance criteria, verification steps, file dự kiến chạm.
-- `tasks/todo.md`: checklist tiến độ ngắn gọn.
-- `tasks/test-plan.md`: test/E2E cases nếu task có UI hoặc browser flow.
+- `tasks/plan.md` có task nhỏ, acceptance criteria, verification steps.
+- `tasks/todo.md` có checklist.
+- `tasks/test-plan.md` có E2E cases nếu có UI/browser flow.
+- `tasks/plan.md` có `Skill Intake Summary`: skill hiện có nên dùng cho từng task và skill còn thiếu nếu có.
 
-### 3. Implement từng task với `$vibe-build`
+### 3. Build
+
+Dùng để implement một task cụ thể.
 
 ```text
 $vibe-build T01
 ```
 
-Codex chỉ làm task được yêu cầu, chạy verification, cập nhật checklist, rồi dừng ở checkpoint. Nếu code chạm input, auth, data storage, permissions, secrets, hoặc external integrations, Codex phải áp dụng thêm `$security-and-hardening`.
+Codex chỉ làm task được yêu cầu, chạy verification, cập nhật checklist, rồi dừng ở checkpoint.
 
-### 4. Test với `$vibe-test`
+### 4. Test
+
+Dùng cho bug fix hoặc khi cần workflow test rõ ràng.
 
 ```text
 $vibe-test
 ```
 
-Với bug fix, dùng Prove-It pattern: viết test fail trước, xác nhận fail, implement fix, xác nhận pass, chạy regression suite.
+Với bug fix, Codex dùng Prove-It pattern: viết test fail trước, xác nhận fail, sửa code, xác nhận pass.
 
-### 5. Review với `$vibe-review`
+### 5. Review
+
+Dùng trước khi merge hoặc sau khi có diff đáng kể.
 
 ```text
 $vibe-review
 ```
 
-Review theo 5 chiều: correctness, readability, architecture, security, performance. Findings phải có file/line và fix recommendation.
+Review tập trung vào correctness, readability, architecture, security, performance. Findings phải có file/line và fix recommendation.
 
-### 6. Ship với `$vibe-ship`
+### 6. E2E
+
+Dùng khi đã có `tasks/test-plan.md` và app chạy được trong browser.
+
+```text
+$vibe-e2e all
+```
+
+Non-pass cases được ghi vào `tasks/test-result.md`.
+
+### 7. Ship
+
+Dùng cho launch readiness.
 
 ```text
 $vibe-ship
 ```
 
-Với thay đổi production-bound, yêu cầu Codex spawn `code-reviewer`, `security-auditor`, và `test-engineer` song song, chờ đủ kết quả, rồi synthesize thành GO/NO-GO kèm rollback plan.
+Nếu cần review song song, yêu cầu rõ:
 
-## Skills nên gọi thêm theo loại dự án
+```text
+Use $vibe-ship. Spawn code-reviewer, security-auditor, and test-engineer in parallel, wait for all three, then synthesize a go/no-go decision.
+```
 
-| Loại dự án | Skill nên kèm theo |
-|------------|--------------------|
-| Backend API, REST/GraphQL, module boundaries | `$api-and-interface-design` |
-| Frontend, UI/UX, component | `$frontend-ui-engineering` |
-| Auth, input, storage, external integrations | `$security-and-hardening` |
-| CI/CD, pipeline, automation | `$ci-cd-and-automation` |
-| Hiệu năng cao | `$performance-optimization` |
-| Cần thông tin framework/library mới nhất | `$source-driven-development` |
+## Skill Theo Loại Việc
 
-## Frontend/backend profiles
+| Việc cần làm | Skill nên dùng |
+|--------------|----------------|
+| Requirements còn mơ hồ | `$interview-me` |
+| Cần refine ý tưởng | `$idea-refine` |
+| Tạo/cập nhật spec | `$vibe-spec` |
+| Lập kế hoạch task | `$vibe-plan` |
+| Implement task | `$vibe-build` |
+| Test hoặc bug regression | `$vibe-test` |
+| Review diff | `$vibe-review` |
+| Simplify code vừa đổi | `$vibe-simplify` |
+| Browser/E2E | `$vibe-e2e` |
+| Launch readiness | `$vibe-ship` |
+| Frontend/UI | `$frontend-ui-engineering` |
+| Backend/API/interface | `$api-and-interface-design` |
+| Auth, input, storage, secrets, integrations | `$security-and-hardening` |
+| CI/CD | `$ci-cd-and-automation` |
+| Performance | `$performance-optimization` |
 
-- Frontend work đọc `.agents/references/frontend-profile.md`: stack chỉ chọn khi `SPEC.md` yêu cầu, checklist responsive/accessibility/states/performance, và slice mẫu `route shell -> static UI -> state/data -> validation -> tests -> e2e`.
-- Backend/API work đọc `.agents/references/backend-profile.md`: stack chỉ chọn khi `SPEC.md` ghi lý do, checklist contract/validation/authz/errors/pagination/observability/performance, và slice mẫu `contract -> route/service -> persistence -> hardening -> tests -> docs`.
-- Không tạo component library, design tokens, generic service layer, hoặc shared abstraction sớm. Chỉ tách khi có 2-3 use case thật.
+## Skill Intake Trong `$vibe-plan`
 
-## Codex notes
+Khi chạy `$vibe-plan`, Codex sẽ tự rà soát scope dự án và skill có sẵn:
 
-- `AGENTS.md` là file instructions chính. Codex đọc file này khi bắt đầu session.
-- Repo skills được Codex scan từ `.agents/skills` từ working directory lên repo root.
-- Custom agents được định nghĩa bằng TOML trong `.codex/agents`.
-- Codex chỉ spawn subagents khi bạn yêu cầu rõ ràng.
-- Custom slash prompts cũ của Codex vẫn tồn tại nhưng đã deprecated; template này dùng skills để chia sẻ workflow trong repo.
+1. Đọc `SPEC.md` và các lát cắt codebase liên quan.
+2. Nhận diện domain: frontend, backend, auth, data, CI/CD, performance, E2E, docs.
+3. So khớp với `.agents/skills/*/SKILL.md`.
+4. Ghi skill đề xuất cho từng task vào `tasks/plan.md`.
+5. Ghi skill còn thiếu vào mục `Skill Gaps`.
+
+`$vibe-plan` chỉ đề xuất skill. Nó không tự cài, tạo, hoặc sửa skill nếu bạn chưa yêu cầu rõ.
+
+## Frontend
+
+Khi làm UI, Codex đọc `.agents/references/frontend-profile.md`.
+
+Quy tắc chính:
+
+- Không chọn Vite/React/Tailwind, Next.js, hoặc stack khác nếu `SPEC.md` chưa yêu cầu.
+- Không tạo component library/design tokens sớm.
+- Chỉ tách shared component khi có 2-3 use case thật.
+- Task UI nên chia nhỏ: route shell, static UI, state/data, validation, tests, E2E.
+- Acceptance cần có responsive, accessibility, loading/error/empty states, keyboard navigation, performance budget.
+
+## Backend
+
+Khi làm API/server, Codex đọc `.agents/references/backend-profile.md`.
+
+Quy tắc chính:
+
+- Không chọn runtime/framework/database nếu `SPEC.md` chưa ghi lý do.
+- Contract phải rõ request/response types.
+- Validate ở boundary: HTTP input, webhook, external API response, env vars, uploads.
+- Protected data phải có authn/authz và ownership checks.
+- List endpoints cần pagination hoặc giới hạn rõ.
+- Task backend nên chia nhỏ: contract, route/service, persistence/integration, hardening, tests, docs.
+
+## Token-Efficient Mode
+
+Repo này được thiết kế để giảm context phình to:
+
+- `AGENTS.md` chỉ giữ luật luôn cần.
+- Hướng dẫn dài nằm trong `.agents/references/`.
+- Tách phase: `spec -> plan -> build -> review -> ship/e2e`.
+- Không đọc toàn repo nếu task chỉ cần vài file.
+- Không gọi nhiều MCP/tool nếu shell/CLI deterministic là đủ.
+- Với GitHub data, ưu tiên `gh pr diff`, `gh pr view --json ...`, hoặc lưu diff/log vào file rồi đọc lát cắt.
+
+## Cấu Trúc Repo
+
+```text
+.
+├── AGENTS.md                     # Runtime rules loaded often
+├── SPEC.md                       # Product/source-of-truth spec
+├── tasks/
+│   ├── plan.md                   # Detailed task plan
+│   ├── todo.md                   # Live progress checklist
+│   ├── test-plan.md              # Browser/E2E suites
+│   └── test-result.md            # Non-pass E2E evidence
+├── .agents/
+│   ├── skills/                   # Repo-scoped Codex skills
+│   └── references/               # Long checklists read on demand
+└── .codex/
+    └── agents/                   # Custom subagents
+```
+
+## Custom Agents
+
+Chỉ dùng subagents khi bạn yêu cầu rõ. Các agent có sẵn:
+
+| Agent | Khi dùng |
+|-------|----------|
+| `code-reviewer` | Review correctness, readability, architecture, security, performance |
+| `security-auditor` | Security review, threat model, hardening |
+| `test-engineer` | Test strategy, missing coverage, regression tests |
+
+## Quy Tắc Hoàn Thành
+
+Một task chỉ được coi là xong khi có evidence:
+
+- Test/build/typecheck/lint output nếu project có runtime.
+- Browser/E2E evidence nếu task có UI flow.
+- Markdown/file inspection nếu chỉ đổi docs.
+- `tasks/todo.md` và `tasks/plan.md` được cập nhật khi scope/task thay đổi.
 
 ## Credits
 
-Template gốc được tạo trong quá trình Vibe Code tại NETCORE LTD bởi Dung Vo. Bộ skills kế thừa ý tưởng từ [agent-skills](https://github.com/addyosmani/agent-skills) của Addy Osmani và [caveman](https://github.com/JuliusBrussee/caveman) của Julius Brussee, sau đó được chỉnh lại cho Codex.
+Template gốc được tạo trong quá trình Vibe Code tại NETCORE LTD bởi Dung Vo. Bộ skills kế thừa ý tưởng từ [agent-skills](https://github.com/addyosmani/agent-skills) và [caveman](https://github.com/JuliusBrussee/caveman), sau đó được chỉnh lại cho Codex.

@@ -23,6 +23,7 @@ Provide a token-efficient Codex project template with durable instructions, repo
 - Prefer deterministic shell/CLI data gathering when LLM reasoning is unnecessary.
 - Prefer `gh` CLI or predownloaded GitHub artifacts over repeated MCP calls for routine GitHub data.
 - Load frontend, backend, testing, security, performance, and accessibility references only when the task needs them.
+- During `$vibe-plan`, run skill intake and record applicable skills plus missing skill gaps in `tasks/plan.md`.
 
 ## Frontend Requirements
 
