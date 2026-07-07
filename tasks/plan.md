@@ -1,6 +1,6 @@
 # Task Plan
 
-Status: T02 complete
+Status: T04 complete
 
 ## T01 - Apply Token, Frontend, Backend, And E2E Template Optimizations
 
@@ -95,3 +95,28 @@ Document how to install and activate Caveman and Ponytail for users of this temp
 - `rtk proxy git diff --check`: pass, no whitespace errors.
 - Inspected README install section: Caveman and Ponytail commands, activation, deactivation, and hooks/script review notes are present.
 - `index_repository(mode="fast")`: graph updated to 811 nodes and 793 edges.
+
+## T04 - Add `$vibe-build all` Batch Mode
+
+### Goal
+
+Allow users to invoke `$vibe-build all` to complete every unchecked task without asking between tasks.
+
+### Acceptance Criteria
+
+- `.agents/skills/vibe-build/SKILL.md` documents invocation modes for one task, next task, and all tasks.
+- `$vibe-build all` runs unchecked tasks sequentially and continues automatically after passing verification.
+- `$vibe-build all` still stops on blockers, failed verification, contradictions, destructive/irreversible actions, or explicit user stop.
+- README documents how and when to use `$vibe-build all`.
+
+### Verification
+
+- Inspect `vibe-build` skill instructions.
+- Inspect README build section.
+- Run `git diff --check`.
+
+### Verification Evidence
+
+- `rtk proxy git diff --check`: pass, no whitespace errors.
+- Inspected `.agents/skills/vibe-build/SKILL.md`: `$vibe-build all` mode runs unchecked tasks sequentially without asking between passing tasks.
+- Inspected `README.md`: documents `$vibe-build all`, auto-continue behavior, stop conditions, and no-commit rule.

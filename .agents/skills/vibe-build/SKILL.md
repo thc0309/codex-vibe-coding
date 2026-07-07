@@ -5,6 +5,21 @@ description: Implement one planned task incrementally with tests, verification, 
 
 Use `incremental-implementation` and `test-driven-development`.
 
+Invocation modes:
+
+- `$vibe-build TXX`: implement only the requested task.
+- `$vibe-build`: implement the next unchecked task in `tasks/todo.md`.
+- `$vibe-build all`: implement every unchecked task in `tasks/todo.md` in dependency order without asking between tasks.
+
+For `$vibe-build all`:
+
+1. Read `tasks/todo.md`, `tasks/plan.md`, and only the relevant `SPEC.md` sections for the unchecked tasks.
+2. Build tasks one at a time, following the normal per-task workflow below.
+3. After each task, run its verification, update `tasks/todo.md`, and record evidence in `tasks/plan.md`.
+4. Continue automatically to the next unchecked task when verification passes.
+5. Stop only if a task is blocked, verification fails, requirements contradict the plan, a destructive/irreversible action is needed, or the user asks to stop.
+6. Do not commit unless the user explicitly asked for commits.
+
 For each task:
 
 1. Identify the requested task or the next unchecked task in `tasks/todo.md`.

@@ -171,6 +171,14 @@ $vibe-build T01
 
 Codex chỉ làm task được yêu cầu, chạy verification, cập nhật checklist, rồi dừng ở checkpoint.
 
+Nếu muốn chạy toàn bộ task chưa hoàn thành:
+
+```text
+$vibe-build all
+```
+
+Chế độ `all` sẽ chạy lần lượt mọi task unchecked trong `tasks/todo.md`, tự tiếp tục khi verification pass, và cập nhật evidence sau từng task. Nó chỉ dừng khi gặp blocker, verification fail, yêu cầu mâu thuẫn, cần hành động phá hủy/không thể đảo ngược, hoặc bạn yêu cầu dừng. Chế độ này vẫn không commit nếu bạn chưa yêu cầu commit rõ.
+
 ### 4. Test
 
 Dùng cho bug fix hoặc khi cần workflow test rõ ràng.
