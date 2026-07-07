@@ -19,7 +19,9 @@ Template chuẩn cho dự án AI Vibe Code chạy trên Codex. Bản này chuy�
 ├── SPEC.md                       # What and why: features, stack, acceptance criteria
 ├── tasks/
 │   ├── plan.md                   # How and order: task plan, AC, verification
-│   └── todo.md                   # Live progress checklist
+│   ├── todo.md                   # Live progress checklist
+│   ├── test-plan.md              # Browser/E2E suites for vibe-e2e
+│   └── test-result.md            # Non-pass E2E evidence
 ├── .agents/
 │   ├── skills/                   # Repo-scoped Codex skills
 │   └── references/               # Reusable checklists
@@ -67,6 +69,16 @@ Mở Codex tại root của dự án:
 codex
 ```
 
+Khi copy template cho project mới, viết lại `SPEC.md`, `tasks/plan.md`, `tasks/todo.md`, và `tasks/test-plan.md` theo sản phẩm thật. Các file này là scaffold vận hành, không phải spec cố định cho mọi project.
+
+## Token-efficient mode
+
+- `AGENTS.md` chỉ giữ luật luôn cần: mục đích repo, token mode, thứ tự đọc file, skill routing tối thiểu.
+- Hướng dẫn dài nằm trong `.agents/references/` và chỉ đọc khi task cần.
+- Tách phase rõ: `spec -> plan -> build -> review -> ship/e2e`. Nên mở session mới hoặc compact context giữa các phase lớn.
+- Ưu tiên đọc lát cắt file nhỏ, không scan toàn repo nếu chưa cần.
+- Giảm MCP/tool overhead: chỉ bật/gọi tool cần thiết; với GitHub data thường dùng `gh` CLI hoặc predownload diff/log vào file thay vì gọi MCP nhiều vòng.
+
 ## Workflow chính
 
 ### 1. Làm rõ yêu cầu với `$vibe-spec`
@@ -99,6 +111,7 @@ Codex sẽ tạo hoặc cập nhật:
 
 - `tasks/plan.md`: task chi tiết, acceptance criteria, verification steps, file dự kiến chạm.
 - `tasks/todo.md`: checklist tiến độ ngắn gọn.
+- `tasks/test-plan.md`: test/E2E cases nếu task có UI hoặc browser flow.
 
 ### 3. Implement từng task với `$vibe-build`
 
@@ -142,6 +155,12 @@ Với thay đổi production-bound, yêu cầu Codex spawn `code-reviewer`, `sec
 | CI/CD, pipeline, automation | `$ci-cd-and-automation` |
 | Hiệu năng cao | `$performance-optimization` |
 | Cần thông tin framework/library mới nhất | `$source-driven-development` |
+
+## Frontend/backend profiles
+
+- Frontend work đọc `.agents/references/frontend-profile.md`: stack chỉ chọn khi `SPEC.md` yêu cầu, checklist responsive/accessibility/states/performance, và slice mẫu `route shell -> static UI -> state/data -> validation -> tests -> e2e`.
+- Backend/API work đọc `.agents/references/backend-profile.md`: stack chỉ chọn khi `SPEC.md` ghi lý do, checklist contract/validation/authz/errors/pagination/observability/performance, và slice mẫu `contract -> route/service -> persistence -> hardening -> tests -> docs`.
+- Không tạo component library, design tokens, generic service layer, hoặc shared abstraction sớm. Chỉ tách khi có 2-3 use case thật.
 
 ## Codex notes
 

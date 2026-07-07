@@ -13,5 +13,6 @@ Read `SPEC.md` and the relevant codebase sections. Then:
 4. Include acceptance criteria, verification steps, and likely files to touch.
 5. Add checkpoints between phases.
 6. Present tradeoffs or open questions for human review.
+7. For UI/browser work, add or update cases in `tasks/test-plan.md`.
 
 Save the detailed plan to `tasks/plan.md` and the checklist to `tasks/todo.md`.

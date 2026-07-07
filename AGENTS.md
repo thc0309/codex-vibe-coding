@@ -1,145 +1,67 @@
-# AGENTS.md - Codex Operating Instructions
+# AGENTS.md - Codex Runtime Rules
 
-This project uses Codex repo-scoped skills and custom agents.
+This repo is a Codex Vibe Coding template. Keep this file small because it is loaded often. Put long guidance in `.agents/references/` and read it only when the task needs it.
 
-- Repo skills live in `.agents/skills/`.
-- Shared checklists live in `.agents/references/`.
-- Codex custom agents live in `.codex/agents/`.
+## Always
 
-Follow this file exactly. It is the durable project contract that Codex reads before work starts.
+- Prefix shell commands with `rtk`.
+- Prefer codebase-memory MCP for code discovery: `search_graph`/`search_code`, `trace_path`, `get_code_snippet`, `get_architecture`. Fall back to `rg`/file reads for docs, configs, literals, or insufficient graph results.
+- Touch only files required by the requested phase or task.
+- Verify with real evidence before claiming done.
+- Do not commit unless the user explicitly asks.
 
-## 0. Project Context And Source-Of-Truth Files
+## Token Budget Mode
 
-Read on demand. Do not load all three eagerly.
+- Default to concise updates and final answers.
+- Read only the smallest relevant file slice. Do not scan the whole repo unless the task requires it.
+- Do not load reference files, skill files, MCP tools, browser tools, or GitHub data unless they are needed for the current phase.
+- Keep phases separate: `spec -> plan -> build -> review -> ship/e2e`. Prefer a new session or compacted context between phases.
+- For GitHub data, prefer deterministic `gh` CLI output or predownloaded diff files over repeated MCP calls when MCP reasoning is not needed.
+- When a task grows beyond the current phase, stop at the checkpoint and ask for the next phase.
 
-| File | Holds | Read when |
-|------|-------|-----------|
-| [SPEC.md](SPEC.md) | what and why: features, stack, conventions, acceptance criteria | starting a feature; making a design choice; checking acceptance criteria |
-| [tasks/plan.md](tasks/plan.md) | how and order: architecture decisions, task entries, dependencies, verification steps | beginning a task; checking dependency order |
-| [tasks/todo.md](tasks/todo.md) | live progress checklist | session start; after completing a task |
+## Source Of Truth
 
-Session start:
-1. Read `tasks/todo.md`.
-2. Find the next unchecked task.
-3. Glance at the status line in `SPEC.md` if present.
-4. Stop and wait for the user's explicit request.
+| File | Read when |
+|------|-----------|
+| `tasks/todo.md` | session start, task selection, after task completion |
+| `SPEC.md` | feature/spec decisions and acceptance criteria |
+| `tasks/plan.md` | requested task details, dependency order, verification |
+| `tasks/test-plan.md` | browser or E2E execution |
 
-Working a task:
-1. Read `tasks/todo.md` and identify the task requested by the user, or the first unchecked task if the user asks for the next task.
-2. Read only that task's entry in `tasks/plan.md` plus cited `SPEC.md` sections.
-3. Use the relevant skill from `.agents/skills`.
-4. Implement incrementally with tests.
-5. Run the verification steps and show evidence.
-6. Stop at the phase checkpoint. Do not roll into the next task.
-7. Tick `tasks/todo.md`; update `SPEC.md` or `tasks/plan.md` if scope changed.
+Session start: read `tasks/todo.md`, glance at the `SPEC.md` status line if present, then wait for the user's request.
 
-## 1. Skill-First Rule
+Task work: identify the requested task, read only that task's `tasks/plan.md` entry plus cited `SPEC.md` sections, use the matching skill, verify, update task status, then stop.
 
-Before writing code or a plan, identify which Codex skill applies. Use explicit `$skill-name` invocation when the user asks for a workflow by name, and allow implicit skill matching when the task description clearly fits a skill.
+## Skill Routing
 
-Intent map:
+| Intent | Skill |
+|--------|-------|
+| Vague requirements | `interview-me` |
+| Refine rough idea | `idea-refine` |
+| Create/update spec | `vibe-spec` |
+| Break spec into tasks | `vibe-plan` |
+| Build/fix/apply changes | `vibe-build` |
+| Tests or bug regression | `vibe-test` |
+| Review current changes | `vibe-review` |
+| Simplify recent changes | `vibe-simplify` |
+| Launch readiness | `vibe-ship` |
+| Browser E2E | `vibe-e2e` |
+| UI/frontend work | add `frontend-ui-engineering` and read `.agents/references/frontend-profile.md` |
+| Backend/API work | add `api-and-interface-design`; add `security-and-hardening` for input, auth, data, secrets, permissions, or integrations |
 
-```text
-Task arrives
-    |
-    |-- Requirements are vague              -> $interview-me
-    |-- Rough concept needs variants         -> $idea-refine
-    |-- New feature or greenfield project    -> $vibe-spec
-    |-- Existing SPEC.md needs tasks         -> $vibe-plan
-    |-- Implementing code                    -> $vibe-build
-    |   |-- UI work                          -> $frontend-ui-engineering
-    |   |-- API/interface work               -> $api-and-interface-design
-    |   |-- High-stakes decision             -> $doubt-driven-development
-    |   |-- Needs official docs              -> $source-driven-development
-    |   |-- Security-sensitive surface        -> $security-and-hardening
-    |-- Writing or running tests             -> $vibe-test
-    |-- Something broke                      -> $debugging-and-error-recovery
-    |-- Reviewing code                       -> $vibe-review
-    |-- Simplifying recent changes           -> $vibe-simplify
-    |-- Committing or branching              -> $git-workflow-and-versioning
-    |-- Deploying or launch readiness         -> $vibe-ship
-```
+Spec, plan, review, and E2E phases are read-only for product code unless the user explicitly asks for edits in that phase.
 
-## 2. Codex Entry Points
+## References
 
-Codex custom prompts are deprecated; this template uses repo-scoped skills as workflow entry points.
+Read only when relevant:
 
-| User intent | Codex skill |
-|-------------|-------------|
-| Make a spec | `$vibe-spec` |
-| Break spec into tasks | `$vibe-plan` |
-| Build a task | `$vibe-build` |
-| Run TDD workflow | `$vibe-test` |
-| Review changes | `$vibe-review` |
-| Simplify code | `$vibe-simplify` |
-| Pre-launch go/no-go | `$vibe-ship` |
-| Browser E2E execution | `$vibe-e2e` |
+- `.agents/references/token-optimization.md` - context, MCP/tool, GitHub data, and phase-split rules.
+- `.agents/references/orchestration-patterns.md` - custom agents and multi-agent review.
+- `.agents/references/frontend-profile.md` - frontend stack, slice plan, acceptance checklist.
+- `.agents/references/backend-profile.md` - backend/API stack, slice plan, acceptance checklist.
+- `.agents/references/testing-patterns.md` - test design patterns.
+- `.agents/references/security-checklist.md` - security review/hardening.
+- `.agents/references/performance-checklist.md` - performance review.
+- `.agents/references/accessibility-checklist.md` - UI accessibility review.
 
-If the user types old slash-command language such as `/spec`, `/plan`, or `/build`, treat it as the matching `$vibe-*` skill unless they explicitly mean a different tool.
-
-## 3. Typical Feature Lifecycle
-
-For non-trivial features, follow this sequence unless the user narrows the request:
-
-```text
-1. interview-me              - clarify vague requirements
-2. idea-refine               - compare possible approaches
-3. vibe-spec                 - define what to build and acceptance criteria
-4. vibe-plan                 - break into small, verifiable tasks
-5. context-engineering       - load only the right context
-6. source-driven-development - verify framework/API facts against current docs
-7. vibe-build                - implement one thin slice
-8. doubt-driven-development  - challenge non-trivial decisions early
-9. vibe-test                 - write/execute focused tests
-10. vibe-review              - review before merge
-11. vibe-simplify            - reduce complexity without behavior changes
-12. git-workflow-and-versioning - prepare atomic commits
-13. documentation-and-adrs   - document important decisions
-14. vibe-ship                - launch checklist and rollback plan
-```
-
-A bug fix can use a shorter path:
-
-```text
-debugging-and-error-recovery -> vibe-test -> vibe-review
-```
-
-## 4. Non-Negotiable Behaviors
-
-1. Surface assumptions before non-trivial implementation.
-2. Stop on real contradictions; name the tradeoff and wait for resolution.
-3. Push back when a requested path is risky; propose a safer alternative.
-4. Prefer boring, obvious code over clever abstractions.
-5. Touch only what the task requires.
-6. Verify with real evidence: test output, build output, runtime checks, or review findings.
-7. Never claim completion without verification.
-8. Keep `tasks/todo.md` and `tasks/plan.md` current after task work.
-9. Ask before committing unless the user explicitly requested a commit.
-
-## 5. Codex Custom Agents
-
-Codex only spawns subagents when the user explicitly asks for subagents or parallel agent work. When requested, use these project agents:
-
-| Agent | File | When to use |
-|-------|------|-------------|
-| `code-reviewer` | `.codex/agents/code-reviewer.toml` | Pre-merge review across correctness, readability, architecture, security, performance |
-| `security-auditor` | `.codex/agents/security-auditor.toml` | Security-focused review, threat modeling, OWASP hardening |
-| `test-engineer` | `.codex/agents/test-engineer.toml` | Test strategy, missing coverage, Prove-It regression tests |
-
-For launch readiness, ask Codex to spawn one agent per perspective and wait for all results:
-
-```text
-Use $vibe-ship. Spawn code-reviewer, security-auditor, and test-engineer in parallel, wait for all three, then synthesize a go/no-go decision.
-```
-
-Subagents should not spawn other subagents. The main session owns orchestration and synthesis.
-
-## 6. Failure Modes To Avoid
-
-1. Skipping skill selection and diving straight into code.
-2. Filling ambiguous requirements silently.
-3. Agreeing to unsafe or overcomplicated approaches without caveats.
-4. Broad refactors unrelated to the task.
-5. Reading the entire repository when the task needs a narrow slice.
-6. Running build/test commands repeatedly without changing anything or learning from the failure.
-7. Leaving stale status in `tasks/todo.md`, `tasks/plan.md`, or `SPEC.md`.
+Subagents are used only when the user explicitly asks for subagents or parallel agent work.

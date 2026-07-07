@@ -17,6 +17,8 @@ Design stable, well-documented interfaces that are hard to misuse. Good interfac
 - Establishing database schema that informs API shape
 - Changing existing public interfaces
 
+Before choosing a backend stack, route style, persistence model, or integration pattern, read `.agents/references/backend-profile.md` when present. Do not create generic service layers or shared abstractions until 2-3 real use cases justify them.
+
 ## Core Principles
 
 ### Hyrum's Law

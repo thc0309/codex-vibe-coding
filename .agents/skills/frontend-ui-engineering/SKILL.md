@@ -17,6 +17,8 @@ Build production-quality user interfaces that are accessible, performant, and vi
 - Adding interactivity or state management
 - Fixing visual or UX issues
 
+Before choosing a stack or UI architecture, read `.agents/references/frontend-profile.md` when present. Do not create a component library, design tokens, or shared primitives until 2-3 real use cases justify the abstraction.
+
 ## Component Architecture
 
 ### File Structure
