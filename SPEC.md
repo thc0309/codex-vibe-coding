@@ -19,7 +19,7 @@ Provide a token-efficient Codex project template with durable instructions, repo
 ## Token Requirements
 
 - Keep always-loaded instructions short and specific.
-- Split work into `spec -> plan -> build -> review -> ship/e2e`.
+- Split interactive work into `spec -> plan -> build -> review -> ship/e2e`; allow explicitly requested `$vibe-build all` runs to cross checkpoints and return one final handoff.
 - Prefer deterministic shell/CLI data gathering when LLM reasoning is unnecessary.
 - Prefer `gh` CLI or predownloaded GitHub artifacts over repeated MCP calls for routine GitHub data.
 - Load frontend, backend, testing, security, performance, and accessibility references only when the task needs them.

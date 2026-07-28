@@ -1,6 +1,6 @@
 # Task Plan
 
-Status: T04 complete
+Status: T05 complete
 
 ## T01 - Apply Token, Frontend, Backend, And E2E Template Optimizations
 
@@ -120,3 +120,50 @@ Allow users to invoke `$vibe-build all` to complete every unchecked task without
 - `rtk proxy git diff --check`: pass, no whitespace errors.
 - Inspected `.agents/skills/vibe-build/SKILL.md`: `$vibe-build all` mode runs unchecked tasks sequentially without asking between passing tasks.
 - Inspected `README.md`: documents `$vibe-build all`, auto-continue behavior, stop conditions, and no-commit rule.
+
+## T05 - Harden Template Bootstrap And Make `$vibe-build all` Autonomous
+
+### Goal
+
+Fix the template review findings and make `$vibe-build all` complete the planned implementation autonomously before one final human review.
+
+### Acceptance Criteria
+
+- New projects start with a fresh Git repository and clean product source-of-truth files.
+- GitHub Actions can be tracked, while `.env` files remain ignored except `.env.example`.
+- README uses a working RTK installation path and current plugin instructions.
+- `$vibe-build all` may cross task and phase checkpoints, resolve ordinary implementation decisions, and retry failed verification without asking between tasks.
+- Automatic commits remain forbidden unless the user explicitly requests them.
+- Skill intake reads skill metadata before loading selected skill bodies.
+- Conflicting commit and checkpoint instructions are removed.
+
+### Files
+
+- `.gitignore`
+- `AGENTS.md`
+- `README.md`
+- `SPEC.md`
+- `.agents/references/orchestration-patterns.md`
+- `.agents/skills/vibe-build/SKILL.md`
+- `.agents/skills/vibe-plan/SKILL.md`
+- `.agents/skills/incremental-implementation/SKILL.md`
+- `.agents/skills/code-simplification/SKILL.md`
+- `scripts/init-project.sh`
+- `tasks/plan.md`
+- `tasks/todo.md`
+
+### Verification
+
+- Run the initializer in a temporary clone and verify Git plus clean scaffold state.
+- Verify `.github/workflows/ci.yml` is trackable and `.env` remains ignored.
+- Run shell syntax and Markdown consistency checks.
+- Run `git diff --check`.
+
+### Verification Evidence
+
+- `rtk sh -n scripts/init-project.sh`: pass.
+- Temporary-copy bootstrap: pass; initialized branch `main`, reset `SPEC.md`, `tasks/todo.md`, and `tasks/test-result.md`.
+- `git check-ignore`: `.env`, `.env.local`, and `.env.production` ignored; `.github/workflows/ci.yml` trackable.
+- RTK installer URL returned HTTP 200.
+- Conflicting automatic-commit instructions removed from the invoked implementation and simplification skills.
+- `rtk proxy git diff --check`: pass.

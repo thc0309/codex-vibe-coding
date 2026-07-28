@@ -38,7 +38,7 @@ For each slice:
 1. **Implement** the smallest complete piece of functionality
 2. **Test** — run the test suite (or write a test if none exists)
 3. **Verify** — confirm the slice works as expected (tests pass, build succeeds, manual check)
-4. **Commit** -- save your progress with a descriptive message (see `git-workflow-and-versioning` for atomic commit guidance)
+4. **Checkpoint** -- record verification evidence; commit only when the user explicitly requested it
 5. **Move to the next slice** — carry forward, don't restart
 
 ## Slicing Strategies
@@ -206,7 +206,7 @@ After each increment, verify:
 - [ ] Type checking passes (`npx tsc --noEmit`)
 - [ ] Linting passes (`npm run lint`)
 - [ ] The new functionality works as expected
-- [ ] The change is committed with a descriptive message
+- [ ] Verification evidence is recorded; a commit is created only if requested
 
 **Note:** Run each verification command after a change that could affect it. After a successful run, don't repeat the same command unless the code has changed since — re-running on unchanged code adds no information.
 
@@ -216,7 +216,7 @@ After each increment, verify:
 |---|---|
 | "I'll test it all at the end" | Bugs compound. A bug in Slice 1 makes Slices 2-5 wrong. Test each slice. |
 | "It's faster to do it all at once" | It *feels* faster until something breaks and you can't find which of 500 changed lines caused it. |
-| "These changes are too small to commit separately" | Small commits are free. Large commits hide bugs and make rollbacks painful. |
+| "I'll bundle unrelated changes" | Small, focused changes are easier to review and roll back, whether or not commits were requested. |
 | "I'll add the feature flag later" | If the feature isn't complete, it shouldn't be user-visible. Add the flag now. |
 | "This refactor is small enough to include" | Refactors mixed with features make both harder to review and debug. Separate them. |
 | "Let me run the build command again just to be sure" | After a successful run, repeating the same command adds nothing unless the code has changed since. Run it again after subsequent edits, not as reassurance. |
@@ -228,7 +228,7 @@ After each increment, verify:
 - "Let me just quickly add this too" scope expansion
 - Skipping the test/verify step to move faster
 - Build or tests broken between increments
-- Large uncommitted changes accumulating
+- Large unrelated changes accumulating without reviewable checkpoints
 - Building abstractions before the third use case demands it
 - Touching files outside the task scope "while I'm here"
 - Creating new utility files for one-time operations
@@ -238,8 +238,8 @@ After each increment, verify:
 
 After completing all increments for a task:
 
-- [ ] Each increment was individually tested and committed
+- [ ] Each increment was individually tested and its evidence recorded
 - [ ] The full test suite passes
 - [ ] The build is clean
 - [ ] The feature works end-to-end as specified
-- [ ] No uncommitted changes remain
+- [ ] All worktree changes are intentional and reported

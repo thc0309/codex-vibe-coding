@@ -5,11 +5,15 @@ Template để khởi tạo dự án làm việc với Codex theo workflow có k
 ## Dùng Nhanh
 
 ```bash
+command -v rtk >/dev/null || curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh | sh
+rtk gain
 git clone https://github.com/netcoreltd/codex-vibe-code.git my-project
 cd my-project
-rm -rf .git
+./scripts/init-project.sh --yes
 codex
 ```
+
+`init-project.sh` xóa lịch sử Git của template, tạo repository mới và reset `SPEC.md` cùng task tracker về trạng thái project chưa được mô tả.
 
 Sau khi mở Codex trong project mới, chạy theo thứ tự:
 
@@ -41,7 +45,7 @@ codex --version
 Repo yêu cầu prefix shell commands bằng `rtk` để giảm token từ output.
 
 ```bash
-curl -fsSL https://rtk.ai/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/master/install.sh | sh
 rtk --version
 rtk gain
 ```
@@ -90,16 +94,11 @@ Cài cho Codex CLI:
 
 ```bash
 codex plugin marketplace add DietrichGebert/ponytail
+codex plugin add ponytail@ponytail
 codex
 ```
 
-Trong Codex:
-
-```text
-/plugins
-```
-
-Sau đó chọn Ponytail marketplace và install Ponytail. Tiếp theo mở:
+Ponytail cần Node.js trong `PATH` để chạy lifecycle hooks. Trong Codex, mở:
 
 ```text
 /hooks
@@ -121,7 +120,7 @@ Lệnh thường dùng sau khi cài:
 
 ## Khởi Tạo Project Mới
 
-Sau khi copy template, viết lại các file source-of-truth theo sản phẩm thật:
+Sau khi `init-project.sh` reset template, `$vibe-spec` và `$vibe-plan` sẽ điền các file source-of-truth theo sản phẩm thật:
 
 | File | Mục đích |
 |------|----------|
@@ -171,13 +170,13 @@ $vibe-build T01
 
 Codex chỉ làm task được yêu cầu, chạy verification, cập nhật checklist, rồi dừng ở checkpoint.
 
-Nếu muốn chạy toàn bộ task chưa hoàn thành:
+Nếu muốn giao toàn bộ phần implementation cho AI và chỉ review một lần ở cuối:
 
 ```text
 $vibe-build all
 ```
 
-Chế độ `all` sẽ chạy lần lượt mọi task unchecked trong `tasks/todo.md`, tự tiếp tục khi verification pass, và cập nhật evidence sau từng task. Nó chỉ dừng khi gặp blocker, verification fail, yêu cầu mâu thuẫn, cần hành động phá hủy/không thể đảo ngược, hoặc bạn yêu cầu dừng. Chế độ này vẫn không commit nếu bạn chưa yêu cầu commit rõ.
+Chế độ `all` tự chạy mọi task unchecked theo dependency order, kể cả qua phase checkpoint. Codex tự chọn phương án tối thiểu phù hợp `SPEC.md`, tự debug và retry khi verification fail, cập nhật evidence sau từng task, rồi trả một báo cáo cuối để bạn review. Nó chỉ dừng khi blocker không thể tự xử lý, thiếu quyền truy cập bên ngoài, `SPEC.md` mâu thuẫn đáng kể, cần hành động phá hủy/không thể đảo ngược, hoặc bạn yêu cầu dừng. Chế độ này vẫn không commit nếu bạn chưa yêu cầu commit rõ.
 
 ### 4. Test
 
@@ -249,7 +248,7 @@ Khi chạy `$vibe-plan`, Codex sẽ tự rà soát scope dự án và skill có 
 
 1. Đọc `SPEC.md` và các lát cắt codebase liên quan.
 2. Nhận diện domain: frontend, backend, auth, data, CI/CD, performance, E2E, docs.
-3. So khớp với `.agents/skills/*/SKILL.md`.
+3. Chỉ đọc frontmatter `name` và `description` của `.agents/skills/*/SKILL.md`, sau đó mới mở nội dung các skill được chọn.
 4. Ghi skill đề xuất cho từng task vào `tasks/plan.md`.
 5. Ghi skill còn thiếu vào mục `Skill Gaps`.
 
@@ -286,7 +285,7 @@ Repo này được thiết kế để giảm context phình to:
 
 - `AGENTS.md` chỉ giữ luật luôn cần.
 - Hướng dẫn dài nằm trong `.agents/references/`.
-- Tách phase: `spec -> plan -> build -> review -> ship/e2e`.
+- Tách phase trong chế độ tương tác; `$vibe-build all` chỉ giữ evidence gọn khi đi qua checkpoint.
 - Không đọc toàn repo nếu task chỉ cần vài file.
 - Không gọi nhiều MCP/tool nếu shell/CLI deterministic là đủ.
 - Với GitHub data, ưu tiên `gh pr diff`, `gh pr view --json ...`, hoặc lưu diff/log vào file rồi đọc lát cắt.
@@ -302,6 +301,8 @@ Repo này được thiết kế để giảm context phình to:
 │   ├── todo.md                   # Live progress checklist
 │   ├── test-plan.md              # Browser/E2E suites
 │   └── test-result.md            # Non-pass E2E evidence
+├── scripts/
+│   └── init-project.sh            # Reset template state and initialize Git
 ├── .agents/
 │   ├── skills/                   # Repo-scoped Codex skills
 │   └── references/               # Long checklists read on demand

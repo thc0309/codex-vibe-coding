@@ -15,9 +15,9 @@ This repo is a Codex Vibe Coding template. Keep this file small because it is lo
 - Default to concise updates and final answers.
 - Read only the smallest relevant file slice. Do not scan the whole repo unless the task requires it.
 - Do not load reference files, skill files, MCP tools, browser tools, or GitHub data unless they are needed for the current phase.
-- Keep phases separate: `spec -> plan -> build -> review -> ship/e2e`. Prefer a new session or compacted context between phases.
+- Keep phases separate for interactive work: `spec -> plan -> build -> review -> ship/e2e`. `$vibe-build all` may cross task and phase checkpoints autonomously.
 - For GitHub data, prefer deterministic `gh` CLI output or predownloaded diff files over repeated MCP calls when MCP reasoning is not needed.
-- When a task grows beyond the current phase, stop at the checkpoint and ask for the next phase.
+- Outside `$vibe-build all`, stop when work grows beyond the requested phase. In `all` mode, checkpoints are progress markers, not approval gates.
 
 ## Source Of Truth
 
@@ -30,7 +30,7 @@ This repo is a Codex Vibe Coding template. Keep this file small because it is lo
 
 Session start: read `tasks/todo.md`, glance at the `SPEC.md` status line if present, then wait for the user's request.
 
-Task work: identify the requested task, read only that task's `tasks/plan.md` entry plus cited `SPEC.md` sections, use the matching skill, verify, update task status, then stop.
+Task work: identify the requested task, read only that task's `tasks/plan.md` entry plus cited `SPEC.md` sections, use the matching skill, verify, and update task status. Stop after one task unless `$vibe-build all` is active.
 
 ## Skill Routing
 

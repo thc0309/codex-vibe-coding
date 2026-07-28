@@ -5,7 +5,9 @@
 .codex-log/
 .codex/tmp/
 .codex/*.local.toml
-.github/
+.env
+.env.*
+!.env.example
 
 # IDE
 .idea/

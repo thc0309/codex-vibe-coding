@@ -7,7 +7,7 @@ Use this file when planning agent workflow, trimming context, or debugging high 
 - Keep `AGENTS.md` short and specific. Put long checklists here or in other `.agents/references/*` files.
 - Load only files needed for the current phase. Prefer targeted snippets over full files.
 - Keep status updates and final answers concise unless the user asks for detail.
-- Stop at phase checkpoints instead of rolling spec, plan, build, and review into one long context.
+- Stop at phase checkpoints for interactive work. In explicitly requested `$vibe-build all` runs, cross checkpoints with concise recorded evidence and compact context when needed.
 
 ## Phase Split
 

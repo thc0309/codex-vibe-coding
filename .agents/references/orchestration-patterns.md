@@ -43,9 +43,19 @@ $vibe-spec -> $vibe-plan -> $vibe-build -> $vibe-test -> $vibe-review -> $vibe-s
 Rules:
 
 - The user controls progression between phases.
-- Do not auto-roll from one task to the next.
+- Do not auto-roll from one task to the next unless the user explicitly invokes `$vibe-build all`.
 - Update `tasks/todo.md` and `tasks/plan.md` after task work.
 - Re-read only the relevant task/spec sections at each phase.
+
+### Autonomous Build Exception
+
+`$vibe-build all` is an explicit delegation of implementation decisions:
+
+- Run every unchecked task in dependency order, including across phase checkpoints.
+- Resolve ordinary ambiguity with the smallest choice consistent with `SPEC.md` and record the decision in `tasks/plan.md`.
+- Diagnose and retry failed verification before declaring a blocker.
+- Ask the user only for a destructive or irreversible action, a material contradiction in `SPEC.md`, missing external access, or an unresolved failure after reasonable debugging.
+- Finish with broad verification and one final review handoff.
 
 ## Pattern 3: Parallel Review Fan-Out
 
